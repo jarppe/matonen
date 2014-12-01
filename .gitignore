@@ -13,3 +13,4 @@
 .settings
 *.log
 /matonen-dev.js
+/matonen.js.map
