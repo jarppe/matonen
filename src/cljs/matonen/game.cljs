@@ -27,7 +27,8 @@
                :dir dir)))
 
 (defn eat-apple [{:keys [mato apple] :as game}]
-  (if apple
+  (if-not apple
+    game
     (let [[[mx my]]  (:path mato)
           [ax ay ar] apple
           dx         (- mx ax)
@@ -38,8 +39,7 @@
             (dissoc :apple)
             (update-in [:score] + (Math/round (- 500 (* ar 10))))
             (update-in [:mato :len] + 50))
-        game))
-    game))
+        game))))
 
 (defn crash-check [{{[[x y]] :path} :mato :keys [hw hh] :as game}]
   (if (and (< (- hw) x hw)
