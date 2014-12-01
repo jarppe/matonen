@@ -1,10 +1,23 @@
 # matonen
 
-A Clojure library designed to ... well, that part is up to you.
+The famous Worm-game (Mato peli in Finnish), but with a twist. Literally.
+
+The "worm" is controlled by turning your device (phone, pad, or some laptops with positional hw) left
+and right.
+
+Currenlty in development (most propably indefinitely).
+
+Controls are still under development, but <kbd>X</kbd> resets game and <kbd>space</kbd> is pause.
 
 ## Usage
 
-FIXME
+### Development
+
+todo...
+
+# Play
+
+Game starts immediatelly. Control your worm by turning your browser.
 
 ## License
 

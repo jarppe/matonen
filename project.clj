@@ -26,7 +26,7 @@
                                                   :compiler {:output-to      "./matonen.js"
                                                              :optimizations  :advanced
                                                              :pretty-print   false
-                                                             :source-map     false}}}}}}
+                                                             :source-map     "./matonen.js.map"}}}}}}
   
   :cljsbuild {:builds {:client {:source-paths ["src/cljs" "src/cljs-dev"]
                                 :compiler {:output-to      "./matonen-dev.js"
