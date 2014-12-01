@@ -24,12 +24,11 @@
 
   :profiles {:prod {:cljsbuild {:builds {:client {:source-paths ^:replace ["src/cljs"]
                                                   :compiler {:output-to      "./matonen.js"
-                                                             :optimizations  :advanced
-                                                             :pretty-print   false
-                                                             :source-map     "./matonen.js.map"}}}}}}
+                                                             :optimizations  :simple
+                                                             :pretty-print   false}}}}}}
   
   :cljsbuild {:builds {:client {:source-paths ["src/cljs" "src/cljs-dev"]
                                 :compiler {:output-to      "./matonen-dev.js"
                                            :output-dir     "./out"
                                            :optimizations  :none
-                                           :source-map     true}}}})
+                                           :source-map     "./matonen.js.map"}}}})
