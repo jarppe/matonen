@@ -17,11 +17,11 @@ todo...
 
 # Play
 
-Game starts immediatelly. Control your worm by turning your browser.
+Game starts immediatelly. Control your worm by turning your device left and right.
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2014 Jarppe Länsiö
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
