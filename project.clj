@@ -9,7 +9,7 @@
                  ; server:
                  [compojure "1.2.2"]
                  [ring/ring-core "1.3.2"]
-                 [http-kit "2.1.16"]
+                 [http-kit "2.1.19-SNAPSHOT"]
                  [javax.servlet/servlet-api "2.5"]
                  
                  ; client:

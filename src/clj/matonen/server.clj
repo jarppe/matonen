@@ -8,11 +8,8 @@
 (defroutes app-routes
   (route/files "/" {:root "."}))
 
-(def app
-  (handler/site app-routes))
-
 (defn start-server [port]
-  (http-kit/run-server #'app {:port port}))
+  (http-kit/run-server #'app-routes {:port port}))
 
 (defn -main [& [port]]
   (let [port (Integer/parseInt (or port
