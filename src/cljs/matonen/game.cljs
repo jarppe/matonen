@@ -26,8 +26,20 @@
                :path (cons [x y] (take len path))
                :dir dir)))
 
-(defn eat-apple [game]
-  game)
+(defn eat-apple [{:keys [mato apple] :as game}]
+  (if apple
+    (let [[[mx my]]  (:path mato)
+          [ax ay ar] apple
+          dx         (- mx ax)
+          dy         (- my ay)
+          d          (Math/sqrt (+ (* dx dx) (* dy dy)))]
+      (if (< d ar)
+        (-> game
+            (dissoc :apple)
+            (update-in [:score] + (Math/round (- 500 (* ar 10))))
+            (update-in [:mato :len] + 50))
+        game))
+    game))
 
 (defn crash-check [{{[[x y]] :path} :mato :keys [hw hh] :as game}]
   (if (and (< (- hw) x hw)
