@@ -16,8 +16,8 @@
     game
     (assoc game :tick (inc tick))))
 
-(defn update [{:keys [paused?] :as game}]
-  (if paused?
+(defn update [{:keys [paused? crash?] :as game}]
+  (if (or paused? crash?)
     game
     (g/update game)))
 
@@ -40,9 +40,12 @@
                                 :ctx      (.getContext canvas "2d")
                                 :width    width
                                 :height   height
+                                :hw       (/ width 2.0)
+                                :hh       (/ height 2.0)
                                 :tick     0
                                 :ts       (u/get-time)
                                 :paused?  false
+                                :crash?   false
                                 :score    0}))))
 
 (defn click [e]
@@ -54,7 +57,7 @@
 
 (defn keypress [e]
   (condp = (.-keyCode e)
-    CR     (js/console.log (pr-str (:mato @game-state)))
+    CR     (js/console.log (pr-str (:apple @game-state)))
     SPACE  (swap! game-state update-in [:paused?] not)
     X      (reset-game!)
     nil))

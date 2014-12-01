@@ -1,45 +1,69 @@
 (ns matonen.game
   (:require [matonen.util :as u :refer-macros [with-ctx]]))
 
-(defn init [{:keys [width height] :as game}]
+(def velocity 2.0)
+
+(defn init [game]
   (assoc game :mato {:path '([0 0])
                      :len  100
                      :dir  0}))
 
-(defn bound [v]
-  (if (> v 1.2)
-    1.2
-    (if (< v -1.2)
-      -1.2
-      v)))
+(defn update-apple [{apple :apple :as game}]
+  (if (or apple (> (rand) 0.01))
+    game
+    (let [width (:width game)
+          height (:height game)]
+      (assoc game :apple [(- (rand width) (/ width 2.0))
+                          (- (rand height) (/ height 2.0))
+                          (+ (rand 30) 10)]))))
 
-(defn update [{:keys [mato orientation width height] :as game}]
-  (let [{:keys [path len dir]} mato
-        dir     (+ dir (/ orientation 10.0))
+(defn update-mato [{{:keys [path len dir]} :mato orientation :orientation :as game}]
+  (let [dir     (+ dir (/ orientation 10.0))
         [[x y]] path
-        y       (- y (* (Math/cos dir) 2.0))
-        x       (+ x (* (Math/sin dir) 2.0))]
-    (assoc game :mato {:path (cons [x y] (take len path))
-                        :len len
-                        :dir dir})))
+        y       (- y (* (Math/cos dir) velocity))
+        x       (+ x (* (Math/sin dir) velocity))]
+    (update-in game [:mato] assoc
+               :path (cons [x y] (take len path))
+               :dir dir)))
+
+(defn eat-apple [game]
+  game)
+
+(defn crash-check [{{[[x y]] :path} :mato :keys [hw hh] :as game}]
+  (if (and (< (- hw) x hw)
+           (< (- hh) y hh))
+    game
+    (assoc game :crash? true)))
+
+(defn update [game]
+  (-> game
+      (update-mato)
+      (update-apple)
+      (eat-apple)
+      (crash-check)))
+
+(defn render-apple [{:keys [ctx] [x y r] :apple}]
+  (if x
+    (doto ctx
+      (aset "strokeStyle" (u/rgb->color 32 255 32))
+      (.beginPath)
+      (.ellipse x y r r 0 u/pi2 false)
+      (.fill))))
 
 (defn render-path [ctx path]
   (doseq [[x y] path]
     (.lineTo ctx x y)))
 
-(defn render-mato [{:keys [ctx width height mato]}]
-  (let [[[x y] & path] (:path mato)]
-    (with-ctx ctx
-      (aset "strokeStyle" (u/rgb->color 255 32 32))
-      (.translate (/ width 2.0) (/ height 2.0))
-      (.beginPath)
-      (.moveTo x y)
-      (render-path path)
-      (.stroke))))
+(defn render-mato [{:keys [ctx] {[[x y] & path] :path} :mato}]
+  (doto ctx
+    (aset "strokeStyle" (u/rgb->color 255 32 32))
+    (.beginPath)
+    (.moveTo x y)
+    (render-path path)
+    (.stroke)))
 
-(defn render-orientation [{:keys [ctx width height orientation mato]}]
+(defn render-orientation [{:keys [ctx orientation mato]}]
   (with-ctx ctx
-    (.translate (/ width 2.0) (/ height 2.0))
     (.rotate (/ orientation 2.0))
     (aset "fillStyle" (u/rgba->color 255 32 32 0.04))
     (.beginPath)
@@ -49,18 +73,13 @@
     (.closePath)
     (.fill)))
 
-(defn render-clear [{:keys [width height ctx]}]
-  (doto ctx
-    (aset "fillStyle" "rgb(32,32,32)")
-    (.fillRect 0 0 width height)))
-
-(defn render-board [{:keys [width height ctx score paused?]}]
+(defn render-board [{:keys [hw hh ctx score paused?]}]
   (doto ctx
     (aset "textAlign" "center")
     (aset "textBaseline" "top")
     (aset "font" "18px sans-serif")
     (aset "fillStyle" "rgba(32,255,32,0.4)")
-    (.fillText "Matonen" (/ width 2.0) 2)
+    (.fillText "Matonen" hw 2)
     (aset "textAlign" "left")
     (.fillText (str score) 2 2))
   (if paused?
@@ -68,11 +87,21 @@
       (aset "textAlign" "center")
       (aset "font" "108px sans-serif")
       (aset "fillStyle" "rgba(32,255,32,0.4)")
-      (.fillText "paused" (/ width 2.0) (/ height 2.0)))))
+      (.fillText "paused" hw hh))))
 
-(defn render [game]
+(defn render-clear [{:keys [ctx width height crash?]}]
+  (doto ctx
+    (aset "fillStyle" (if crash? "rgb(128,32,32)" "rgb(32,32,32)"))
+    (.fillRect 0 0 width height)))
+
+(defn render [{:keys [ctx hw hh] :as game}]
   (render-clear game)
   (render-board game)
-  (render-mato game)
-  (render-orientation game)
+  (.save ctx)
+  (.translate ctx hw hh)
+  (doto game
+    (render-mato)
+    (render-apple)
+    (render-orientation))
+  (.restore ctx)
   game)
