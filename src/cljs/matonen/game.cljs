@@ -21,8 +21,12 @@
                           (- (rand height) (/ height 2.0))
                           (+ (rand 30) 10)]))))
 
-(defn update-mato [{{:keys [path len dir]} :mato orientation :orientation :as game}]
-  (let [dir     (+ dir (/ orientation 10.0))
+(defn update-mato [{{:keys [path len dir]} :mato :keys [orientation orient?] :as game}]
+  (let [dir     (+ dir (cond
+                         orient?        (/ orientation 10.0) 
+                         (:left game)   -0.08
+                         (:right game)  0.08
+                         :else          0))
         [[x y]] path
         y       (- y (* (Math/cos dir) velocity))
         x       (+ x (* (Math/sin dir) velocity))]
