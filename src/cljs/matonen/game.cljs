@@ -59,7 +59,7 @@
     (doto ctx
       (aset "strokeStyle" (u/rgb->color 32 255 32))
       (.beginPath)
-      (.ellipse x y r r 0 u/pi2 false)
+      (.arc x y r 0 u/pi2 false)
       (.fill))))
 
 (defn render-path [ctx path]
