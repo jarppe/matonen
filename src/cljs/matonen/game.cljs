@@ -6,6 +6,8 @@
 (def max-apples 10)
 (def mato-len 100)
 
+(defn consf (fn [v s] (cons s v)))
+
 (defn init [game]
   (assoc game
          :mato {:path '([0 0])
@@ -19,8 +21,9 @@
           height  (:height game)
           x       (- (rand width) (/ width 2.0))
           y       (- (rand height) (/ height 2.0))
-          r       (+ (rand 30) 10)]
-      (update-in game [:apples] #(cons [x y r] %)))
+          r       (+ (rand 30) 10)
+          apple   [x y r]]
+      (update-in game [:apples] consf apple))
     game))
 
 (defn update-mato [{{:keys [path dir]} :mato :keys [orientation orient?] :as game}]
