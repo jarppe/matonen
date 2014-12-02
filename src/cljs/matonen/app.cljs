@@ -14,7 +14,9 @@
 (defn tick [{:keys [tick paused?] :as game}]
   (if paused?
     game
-    (assoc game :tick (inc tick))))
+    (assoc game
+           :tick  (inc tick)
+           :ts    (u/get-time))))
 
 (defn update [{:keys [paused? crash?] :as game}]
   (if (or paused? crash?)
@@ -49,12 +51,12 @@
                                 :score    0}))))
 
 (defn pause-game []
-  (swap! game-state update-in [:paused?] not))
-
-(defn click [e]
   (if (:crash? @game-state)
     (reset-game!)
-    (pause-game)))
+    (swap! game-state update-in [:paused?] not)))
+
+(defn click [e]
+  (pause-game))
 
 (def CR     13)
 (def SPACE  32)

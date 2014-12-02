@@ -1,5 +1,6 @@
 (ns matonen.game
-  (:require [matonen.util :as u :refer-macros [with-ctx]]))
+  (:require [matonen.util :as u :refer-macros [with-ctx]]
+            [matonen.anim :as a]))
 
 (def velocity 2.0)
 
@@ -7,6 +8,9 @@
   (assoc game :mato {:path '([0 0])
                      :len  100
                      :dir  0}))
+
+(defonce id (atom 0))
+(defn next-id [] (swap! id inc))
 
 (defn update-apple [{apple :apple :as game}]
   (if (or apple (> (rand) 0.01))
@@ -35,11 +39,33 @@
           dy         (- my ay)
           d          (Math/sqrt (+ (* dx dx) (* dy dy)))]
       (if (< d ar)
-        (-> game
-            (dissoc :apple)
-            (update-in [:score] + (Math/round (- 500 (* ar 10))))
-            (update-in [:mato :len] + 50))
+        (let [points (Math/round (- 500 (* ar 10)))]
+          (-> game
+              (dissoc :apple)
+              (update-in [:score] + points)
+              (update-in [:scores] #(cons {:x ax
+                                           :y ay
+                                           :points points
+                                           :size (a/scale 5 100 1000 (:ts game))
+                                           :alpha (a/scale 1 0 1000 (:ts game))} %))))
         game))))
+
+(defn render-score [ctx ts {:keys [x y points size alpha]}]
+  (let [s (size ts)
+        a (alpha ts)]
+    (when s
+      (doto ctx
+        (aset "font" (str s "px sans-serif"))
+        (aset "fillStyle" (str "rgba(32,255,32," a ")"))
+        (.fillText (str points) x y))
+      true)))
+
+(defn render-scores [{:keys [ctx ts scores] :as game}]
+  (when (seq scores)
+    (doto ctx
+      (aset "textAlign" "center")
+      (aset "textBaseline" "center"))
+    (assoc game :scores (doall (filter (partial render-score ctx ts) scores)))))
 
 (defn crash-check [{{[[x y]] :path} :mato :keys [hw hh] :as game}]
   (if (and (< (- hw) x hw)
@@ -114,6 +140,6 @@
   (doto game
     (render-mato)
     (render-apple)
-    (render-orientation))
+    (render-scores))
   (.restore ctx)
   game)
