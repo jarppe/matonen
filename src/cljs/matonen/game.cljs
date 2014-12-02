@@ -4,11 +4,11 @@
 
 (def velocity 2.0)
 (def max-apples 10)
+(def mato-len 100)
 
 (defn init [game]
   (assoc game
          :mato {:path '([0 0])
-                :len  100
                 :dir  0}
          :apples nil
          :scores nil))
@@ -23,7 +23,7 @@
       (update-in game [:apples] #(cons [x y r] %)))
     game))
 
-(defn update-mato [{{:keys [path len dir]} :mato :keys [orientation orient?] :as game}]
+(defn update-mato [{{:keys [path dir]} :mato :keys [orientation orient?] :as game}]
   (let [dir     (+ dir (cond
                          orient?        (/ orientation 10.0) 
                          (:left game)   -0.08
@@ -33,7 +33,7 @@
         y       (- y (* (Math/cos dir) velocity))
         x       (+ x (* (Math/sin dir) velocity))]
     (update-in game [:mato] assoc
-               :path (cons [x y] (take len path))
+               :path (cons [x y] (take mato-len path))
                :dir dir)))
 
 (defn apple->score [ts [x y r]]
