@@ -48,8 +48,13 @@
                                 :crash?   false
                                 :score    0}))))
 
+(defn pause-game []
+  (swap! game-state update-in [:paused?] not))
+
 (defn click [e]
-  (js/console.log "click:" e))
+  (if (:crash? @game-state)
+    (reset-game!)
+    (pause-game)))
 
 (def CR     13)
 (def SPACE  32)
@@ -58,7 +63,7 @@
 (defn keypress [e]
   (condp = (.-keyCode e)
     CR     (js/console.log (pr-str (:apple @game-state)))
-    SPACE  (swap! game-state update-in [:paused?] not)
+    SPACE  (pause-game)
     X      (reset-game!)
     nil))
 
@@ -66,7 +71,7 @@
 
 (defn deviceorientation [e]
   (swap! game-state assoc
-         :orientation (-> e (.-gamma) (* deg->rad))))
+         :orientation (-> e (.-beta) (* deg->rad))))
 
 (defn init []
   (js/console.log "init")
