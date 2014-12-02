@@ -9,6 +9,8 @@ Currenlty in development (most propably indefinitely).
 
 Controls are still under development, but <kbd>X</kbd> resets game and <kbd>space</kbd> is pause.
 
+You can try the game [here](http://jarppe.github.com/matonen)
+
 ## Usage
 
 ### Development
