@@ -24,7 +24,7 @@
 
   :profiles {:prod {:cljsbuild {:builds {:client {:source-paths ^:replace ["src/cljs"]
                                                   :compiler {:output-to      "./matonen.js"
-                                                             :optimizations  :simple
+                                                             :optimizations  :advanced
                                                              :pretty-print   false}}}}}}
   
   :cljsbuild {:builds {:client {:source-paths ["src/cljs" "src/cljs-dev"]
