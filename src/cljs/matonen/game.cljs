@@ -50,8 +50,8 @@
 (defn update [game]
   (-> game
       (update-mato)
-      (update-apple)
-      (eat-apple)
+      #_(update-apple)
+      #_(eat-apple)
       (crash-check)))
 
 (defn render-apple [{:keys [ctx] [x y r] :apple}]
