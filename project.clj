@@ -19,16 +19,31 @@
                  [lively "0.1.2"]]
   
   :plugins [[lein-cljsbuild "1.0.3"]]
-
+  
   :source-paths ["src/clj"]
 
-  :profiles {:prod {:cljsbuild {:builds {:client {:source-paths ^:replace ["src/cljs"]
+  :profiles {:dev {:plugins [[com.keminglabs/cljx "0.4.0" :exclusions [org.clojure/clojure]]]
+                   :dependencies [[midje "1.6.3"]]}
+             :prod {:cljsbuild {:builds {:client {:source-paths ^:replace ["src/cljs" "target/cljs"]
                                                   :compiler {:output-to      "./matonen.js"
                                                              :optimizations  :simple
-                                                             :pretty-print   false}}}}}}
+                                                             :pretty-print   false}}}}}
+             :uberjar {:main matonen.server
+                       :aot [matonen.server]
+                       :uberjar-name "matonen.jar"}}
   
-  :cljsbuild {:builds {:client {:source-paths ["src/cljs" "src/cljs-dev"]
+  :cljx {:builds [{:source-paths ["src/cljx"]
+                   :output-path "target/classes"
+                   :rules :clj}
+                  {:source-paths ["src/cljx"]
+                   :output-path "target/cljs"
+                   :rules :cljs}]}
+  
+  :cljsbuild {:builds {:client {:source-paths ["src/cljs" "target/cljs" "src/cljs-dev"]
                                 :compiler {:output-to      "./matonen-dev.js"
                                            :output-dir     "./out"
                                            :optimizations  :none
-                                           :source-map     "./matonen.js.map"}}}})
+                                           :source-map     "./matonen.js.map"}}}}
+  
+  :aliases {"cljs" ["do" ["cljsbuild" "clean"] ["cljsbuild" "auto"]]
+            "build" ["do" ["cljx" "once"] ["cljsbuild" "clean"] ["with-profile" "prod" "cljsbuild" "once"]]})
