@@ -3,23 +3,25 @@
             [matonen.anim :as a]))
 
 (def velocity 2.0)
+(def max-apples 10)
 
 (defn init [game]
-  (assoc game :mato {:path '([0 0])
-                     :len  100
-                     :dir  0}))
+  (assoc game
+         :mato {:path '([0 0])
+                :len  100
+                :dir  0}
+         :apples nil
+         :scores nil))
 
-(defonce id (atom 0))
-(defn next-id [] (swap! id inc))
-
-(defn update-apple [{apple :apple :as game}]
-  (if (or apple (> (rand) 0.01))
-    game
-    (let [width (:width game)
-          height (:height game)]
-      (assoc game :apple [(- (rand width) (/ width 2.0))
-                          (- (rand height) (/ height 2.0))
-                          (+ (rand 30) 10)]))))
+(defn update-apple [{apples :apples :as game}]
+  (if (and (< (count apples) max-apples) (< (rand) 0.02))
+    (let [width   (:width game)
+          height  (:height game)
+          x       (- (rand width) (/ width 2.0))
+          y       (- (rand height) (/ height 2.0))
+          r       (+ (rand 30) 10)]
+      (update-in game [:apples] #(cons [x y r] %)))
+    game))
 
 (defn update-mato [{{:keys [path len dir]} :mato :keys [orientation orient?] :as game}]
   (let [dir     (+ dir (cond
@@ -34,25 +36,28 @@
                :path (cons [x y] (take len path))
                :dir dir)))
 
-(defn eat-apple [{:keys [mato apple] :as game}]
-  (if-not apple
-    game
-    (let [[[mx my]]  (:path mato)
-          [ax ay ar] apple
-          dx         (- mx ax)
-          dy         (- my ay)
-          d          (Math/sqrt (+ (* dx dx) (* dy dy)))]
-      (if (< d ar)
-        (let [points (Math/round (- 500 (* ar 10)))]
-          (-> game
-              (dissoc :apple)
-              (update-in [:score] + points)
-              (update-in [:scores] #(cons {:x ax
-                                           :y ay
-                                           :points points
-                                           :size (a/scale 5 100 1000 (:ts game))
-                                           :alpha (a/scale 1 0 1000 (:ts game))} %))))
-        game))))
+(defn apple->score [ts [x y r]]
+  (let [points (Math/round (- 500 (* r 10)))]
+    {:x x
+     :y y
+     :points points
+     :size (a/scale 5 100 1000 ts)
+     :alpha (a/scale 1 0 1000 ts)}))
+
+(defn eat-apple? [mx my [ax ay ar]]
+  (let [dx  (- mx ax)
+        dy  (- my ay)
+        d   (Math/sqrt (+ (* dx dx) (* dy dy)))]
+    (< d ar)))
+
+(defn eat-apples [{:keys [mato apples] :as game}]
+  (let [[[x y]] (:path mato)
+        eaten   (filter (partial eat-apple? x y) apples)]
+    (if (seq eaten)
+      (-> game
+          (update-in [:scores] concat (map (partial apple->score (:ts game)) eaten))
+          (assoc :apples (remove (partial eat-apple? x y) apples)))
+      game)))
 
 (defn render-score [ctx ts {:keys [x y points size alpha]}]
   (let [s (size ts)
@@ -81,13 +86,13 @@
   (-> game
       (update-mato)
       (update-apple)
-      (eat-apple)
+      (eat-apples)
       (crash-check)))
 
-(defn render-apple [{:keys [ctx] [x y r] :apple}]
-  (if x
+(defn render-apples [{:keys [ctx apples]}]
+  (aset ctx "strokeStyle" (u/rgb->color 32 255 32))
+  (doseq [[x y r] apples]
     (doto ctx
-      (aset "strokeStyle" (u/rgb->color 32 255 32))
       (.beginPath)
       (.arc x y r 0 u/pi2 false)
       (.fill))))
@@ -143,7 +148,7 @@
   (.translate ctx hw hh)
   (doto game
     (render-mato)
-    (render-apple)
+    (render-apples)
     (render-scores))
   (.restore ctx)
   game)

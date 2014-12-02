@@ -60,7 +60,7 @@
   (pause-game))
 
 (def keydown {32   pause-game
-              120  reset-game!
+              88   reset-game!
               37   (fn [] (swap! game-state assoc :left true))
               39   (fn [] (swap! game-state assoc :right true))
               79   (fn [] (swap! game-state update-in [:orient?] not))})
