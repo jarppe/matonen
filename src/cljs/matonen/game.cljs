@@ -6,7 +6,7 @@
 (def max-apples 10)
 (def mato-len 100)
 
-(defn consf (fn [v s] (cons s v)))
+(defn consf [v s] (cons s v))
 
 (defn init [game]
   (assoc game
