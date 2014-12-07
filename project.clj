@@ -18,7 +18,8 @@
                  [alandipert/storage-atom "1.2.3"]
                  [lively "0.1.2"]]
   
-  :plugins [[lein-cljsbuild "1.0.3"]]
+  :plugins [[lein-cljsbuild "1.0.3"]
+            [lein-midje "3.0.0"]]
   
   :source-paths ["src/clj"]
 
